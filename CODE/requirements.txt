@@ -1,0 +1,9 @@
+streamlit
+uuid
+langchain
+sentence-transformers
+chromadb
+easyocr
+opencv-python
+python-dotenv
+numpy
