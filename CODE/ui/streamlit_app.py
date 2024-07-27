@@ -1,11 +1,14 @@
 import streamlit as st
 import json
+import os
+import tempfile
 from src.services import DocumentService
 from src.utils import read_image
 
 class StreamlitApp:
     def __init__(self):
         self.document_service = DocumentService()
+        self.temp_dir = tempfile.mkdtemp()
 
     def run(self):
         st.title("Document Management System with OCR")
@@ -21,6 +24,14 @@ class StreamlitApp:
         elif operation == "Delete":
             self.delete_document_ui()
 
+    def save_uploaded_file(self, uploaded_file):
+        if uploaded_file is not None:
+            file_path = os.path.join(self.temp_dir, uploaded_file.name)
+            with open(file_path, "wb") as f:
+                f.write(uploaded_file.getbuffer())
+            return file_path
+        return None
+
     def add_document_ui(self):
         st.header("Add New Document")
         doc_type = st.radio("Document Type", ["Text", "Image"])
@@ -30,8 +41,9 @@ class StreamlitApp:
         else:
             uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
             if uploaded_file is not None:
-                content = read_image(uploaded_file)
-                st.image(content, caption='Uploaded Image', use_column_width=True)
+                file_path = self.save_uploaded_file(uploaded_file)
+                content = file_path
+                st.image(read_image(file_path), caption='Uploaded Image', use_column_width=True)
             else:
                 content = None
 
@@ -62,7 +74,10 @@ class StreamlitApp:
                         st.write(f"Content: {doc.content}")
                         st.write(f"Metadata: {doc.metadata}")
                         st.write(f"Document Type: {doc.doc_type}")
-                        st.write("---")
+                        if doc.doc_type == 'image':
+                            # st.write(doc.content)
+                            # st.image(read_image(doc.content), caption='Document Image', use_column_width=True)
+                            st.write("---image data ---\n")
                 else:
                     st.info("No results found.")
             except Exception as e:
@@ -87,14 +102,17 @@ class StreamlitApp:
             new_doc_type = st.radio("Document Type", ["Text", "Image"], index=0 if doc.doc_type == 'text' else 1)
             
             if new_doc_type == "Text":
-                new_content = st.text_area("Edit content", value=doc.content)
+                new_content = st.text_area("Edit content", value=doc.content if doc.doc_type == 'text' else "")
             else:
                 uploaded_file = st.file_uploader("Choose a new image...", type=["jpg", "jpeg", "png"])
                 if uploaded_file is not None:
-                    new_content = read_image(uploaded_file)
-                    st.image(new_content, caption='New Image', use_column_width=True)
+                    file_path = self.save_uploaded_file(uploaded_file)
+                    new_content = file_path
+                    st.image(read_image(file_path), caption='New Image', use_column_width=True)
                 else:
-                    new_content = None
+                    new_content = doc.content if doc.doc_type == 'image' else None
+                    if new_content:
+                        st.image(read_image(new_content), caption='Current Image', use_column_width=True)
 
             new_metadata = st.text_input("Edit metadata (in JSON format)", value=json.dumps(doc.metadata))
             
