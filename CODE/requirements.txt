@@ -7,3 +7,8 @@ easyocr
 opencv-python
 python-dotenv
 numpy
+tiktoken
+selenium
+beautifulsoup4
+pandas
+nltk
