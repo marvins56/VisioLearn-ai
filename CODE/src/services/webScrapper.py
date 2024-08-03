@@ -83,5 +83,15 @@ class WebScraper:
 
     def close(self):
         if self.driver:
-            self.driver.quit()
-            self.logger.info("WebDriver closed")
+          self.driver.quit()
+          self.logger.info("WebDriver closed")
+
+
+# # Example usage
+# if __name__ == "__main__":
+#     scraper = WebScraper()
+#     url = "http://example.com"
+#     scraped_data = scraper.scrape_website(url)
+#     scraper.close()
+#     print(scraped_data)
+
