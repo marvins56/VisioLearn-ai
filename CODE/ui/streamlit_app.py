@@ -3,12 +3,18 @@ import json
 import os
 import tempfile
 from src.services import DocumentService
+from src.services import AudioService
 from src.utils import read_image
 
 class StreamlitApp:
     def __init__(self):
         self.document_service = DocumentService()
+        self.audio_service = AudioService()
         self.temp_dir = tempfile.mkdtemp()
+        self.llm_utility = LLMUtility()
+        self.scraper = WebScraper()
+        self.summarizer = Summarizer(self.llm_utility)
+
 
     def run(self):
         st.title("Document Management System with OCR")
