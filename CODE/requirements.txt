@@ -12,3 +12,6 @@ selenium
 beautifulsoup4
 pandas
 nltk
+openai-whisper
+elevenlabs
+

@@ -3,6 +3,10 @@ import json
 import os
 import tempfile
 from src.services import DocumentService
+from src.services import AudioService
+from src.services import WebScraper
+from TestFeatures.summaryAgent import Summarizer
+from src.utils.LLMUtility import LLMUtility
 from src.utils import read_image
 from src.services.webScrapper import WebScraper
 from src.utils.LLMUtility import LLMUtility
@@ -12,10 +16,12 @@ from TestFeatures.summaryAgent import Summarizer
 class StreamlitApp:
     def __init__(self):
         self.document_service = DocumentService()
+        self.audio_service = AudioService()
         self.temp_dir = tempfile.mkdtemp()
         self.llm_utility = LLMUtility()
         self.scraper = WebScraper()
-        self.summarizer = Summarizer(self.llm_utility)  # Initialize Summarizer with the required LLM utility
+        self.summarizer = Summarizer(self.llm_utility)
+
 
 
     def run(self):
