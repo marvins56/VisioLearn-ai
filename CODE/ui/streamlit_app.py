@@ -26,8 +26,6 @@ class StreamlitApp:
         self.question_generator = QuestionGenerator(self.llm_utility)
         self.answerValidator = AnswerValidator(self.llm_utility)
 
-        print(self.question_generator.generate_qa("Databases"))
-
     def run(self):
         st.title("Document Management System with OCR")
 
