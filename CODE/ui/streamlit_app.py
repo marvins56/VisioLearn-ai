@@ -11,6 +11,7 @@ from src.utils.LLMUtility import LLMUtility
 from src.utils import read_image
 from src.services.webScrapper import WebScraper
 from src.utils.LLMUtility import LLMUtility
+from src.services.AnswerValidator import AnswerValidator
 # from TestFeatures.summaryAgent import Summarizer
 
 
@@ -23,6 +24,7 @@ class StreamlitApp:
         self.llm_utility = LLMUtility()
         self.scraper = WebScraper()
         self.web_search_and_summarize = WebSearchAndSummarize()
+        self.answerValidator = AnswerValidator(self.llm_utility)
 
 
 
@@ -118,6 +120,49 @@ class StreamlitApp:
                 st.error(f"An error occurred: {str(e)}")
             finally:
                 self.web_search_and_summarize.close()
+
+        #         def search_and_summarize_ui(self):
+        #     st.header("Search and Summarize Web Content")
+        # query = st.text_input("Enter your search query")
+        
+        # if st.button("Search and Summarize"):
+        #     try:
+        #         # Perform web search and summarization
+        #         summaries = self.web_search_and_summarize.process_query(query)
+                
+        #         # Display results and save non-empty summaries
+        #         saved_count = 0
+        #         for i, summary in enumerate(summaries, 1):
+        #             st.subheader(f"Result {i}")
+        #             st.write(f"Title: {summary['title']}")
+        #             st.write(f"URL: {summary['url']}")
+
+        #             # Validate and improve summary
+        #             validated_summary = self.answerValidator.validate_answer(query, summary['summary'])
+        #             st.text_area("Summary", validated_summary, height=150)
+                    
+        #             st.write("---")
+
+        #             # Automatically save non-empty summaries
+        #             if validated_summary.strip():  # Check if summary is not just whitespace
+        #                 metadata = {
+        #                     "source_url": summary['url'],
+        #                     "original_title": summary['title'],
+        #                     "search_query": query
+        #                 }
+        #                 doc_id = self.document_service.add_document(validated_summary, metadata, "text")
+        #                 saved_count += 1
+        #                 st.success(f"Summary {i} automatically saved as document with ID: {doc_id}")
+
+        #         if saved_count > 0:
+        #             st.info(f"{saved_count} non-empty summaries were automatically saved.")
+        #         else:
+        #             st.warning("No non-empty summaries were found to save.")
+
+        #     except Exception as e:
+        #         st.error(f"An error occurred: {str(e)}")
+        #     finally:
+        #         self.web_search_and_summarize.close()
 
     def search_documents_ui(self):
         st.header("Search Documents")
