@@ -71,7 +71,7 @@ class WebSearchAndSummarize:
 
     def process_query(self, query):
         try:
-            search_results = self.search.results(query, 5)  # Get top 5 results
+            search_results = self.search.results(query, 1)  # Get top 5 results
             summaries = []
 
             for result in search_results:
