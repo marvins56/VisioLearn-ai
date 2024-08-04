@@ -14,8 +14,6 @@ from src.utils.LLMUtility import LLMUtility
 from src.services.AnswerValidator import AnswerValidator
 # from TestFeatures.summaryAgent import Summarizer
 
-
-
 class StreamlitApp:
     def __init__(self):
         self.document_service = DocumentService()
@@ -80,8 +78,8 @@ class StreamlitApp:
             except json.JSONDecodeError:
                 st.error("Invalid JSON format for metadata. Please check and try again.")
             except Exception as e:
+        
                 st.error(f"An error occurred: {str(e)}")
-    
     def search_and_summarize_ui(self):
         st.header("Search and Summarize Web Content")
         query = st.text_input("Enter your search query")
@@ -95,19 +93,36 @@ class StreamlitApp:
                 saved_count = 0
                 for i, summary in enumerate(summaries, 1):
                     st.subheader(f"Result {i}")
-                    st.write(f"Title: {summary['title']}")
-                    st.write(f"URL: {summary['url']}")
-                    st.text_area("Summary", summary['summary'], height=150)
+                    
+                    # Accessing title and URL from summary object
+                    title = summary.get('title', 'No title provided')
+                    url = summary.get('url', 'No URL provided')
+                    
+                    st.write(f"Title: {title}")
+                    st.write(f"URL: {url}")
+                    
+                    # Validate and improve summary
+                    validated_summary = self.answerValidator.validate_answer(query, summary.get('summary', ''))
+                    
+                    # Access content from validated_summary
+                    summary_content = validated_summary.get('content', '') if isinstance(validated_summary, dict) else getattr(validated_summary, 'content', '')
+                    
+                    st.text_area("Summary", summary_content, height=150)
+                  # Convert the summary to audio
+                    if summary_content.strip():  # Check if summary is not just whitespace
+                        audio_content = self.audio_service.text_to_audio_v2(summary_content)
+                        st.audio(audio_content, format='audio/mp3')  # Ensure format matches your audio data
+                        
                     st.write("---")
 
                     # Automatically save non-empty summaries
-                    if summary['summary'].strip():  # Check if summary is not just whitespace
+                    if summary_content.strip():  # Check if summary is not just whitespace
                         metadata = {
-                            "source_url": summary['url'],
-                            "original_title": summary['title'],
+                            "source_url": url,
+                            "original_title": title,
                             "search_query": query
                         }
-                        doc_id = self.document_service.add_document(summary['summary'], metadata, "text")
+                        doc_id = self.document_service.add_document(summary_content, metadata, "text")
                         saved_count += 1
                         st.success(f"Summary {i} automatically saved as document with ID: {doc_id}")
 
@@ -121,48 +136,6 @@ class StreamlitApp:
             finally:
                 self.web_search_and_summarize.close()
 
-        #         def search_and_summarize_ui(self):
-        #     st.header("Search and Summarize Web Content")
-        # query = st.text_input("Enter your search query")
-        
-        # if st.button("Search and Summarize"):
-        #     try:
-        #         # Perform web search and summarization
-        #         summaries = self.web_search_and_summarize.process_query(query)
-                
-        #         # Display results and save non-empty summaries
-        #         saved_count = 0
-        #         for i, summary in enumerate(summaries, 1):
-        #             st.subheader(f"Result {i}")
-        #             st.write(f"Title: {summary['title']}")
-        #             st.write(f"URL: {summary['url']}")
-
-        #             # Validate and improve summary
-        #             validated_summary = self.answerValidator.validate_answer(query, summary['summary'])
-        #             st.text_area("Summary", validated_summary, height=150)
-                    
-        #             st.write("---")
-
-        #             # Automatically save non-empty summaries
-        #             if validated_summary.strip():  # Check if summary is not just whitespace
-        #                 metadata = {
-        #                     "source_url": summary['url'],
-        #                     "original_title": summary['title'],
-        #                     "search_query": query
-        #                 }
-        #                 doc_id = self.document_service.add_document(validated_summary, metadata, "text")
-        #                 saved_count += 1
-        #                 st.success(f"Summary {i} automatically saved as document with ID: {doc_id}")
-
-        #         if saved_count > 0:
-        #             st.info(f"{saved_count} non-empty summaries were automatically saved.")
-        #         else:
-        #             st.warning("No non-empty summaries were found to save.")
-
-        #     except Exception as e:
-        #         st.error(f"An error occurred: {str(e)}")
-        #     finally:
-        #         self.web_search_and_summarize.close()
 
     def search_documents_ui(self):
         st.header("Search Documents")

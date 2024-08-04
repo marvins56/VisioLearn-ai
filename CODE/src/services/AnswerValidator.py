@@ -25,26 +25,45 @@ from src.utils import LLMUtility
     #     # Extract and return the response
     #     return response.get("choices")[0].get("text").strip()
 
-
+from langchain.chat_models import ChatOpenAI
+from langchain.schema import HumanMessage, SystemMessage
 class AnswerValidator:
     def __init__(self, llm_utility: LLMUtility):
         self.llm_utility = llm_utility
 
     def validate_answer(self, question: str, summary: str) -> str:
+        """
+        Validates if the provided summary correctly answers the given question and improves the summary if necessary.
+
+        Parameters:
+            question (str): The question that needs to be answered.
+            summary (str): The summary to be validated.
+
+        Returns:
+            str: A more accurate and human-like answer if necessary, otherwise the original summary if it is correct.
+        """
+        
         # Get LLM instance
         llm = self.llm_utility.get_llm_instance()
 
         # Create prompt for validation
-        prompt = f"Validate if the following summary answers the question correctly:\n\nQuestion: {question}\n\nSummary: {summary}\n\nProvide a more accurate and human-like answer if necessary."
+        prompt = (
+            f"Evaluate whether the following summary answers the given question accurately. "
+            f"If the summary is not sufficient or accurate, provide a more precise and human-like response.\n\n"
+            f"Question: {question}\n\n"
+            f"Summary: {summary}\n\n"
+            f"Provide an improved answer if needed."
+        )
 
         # Prepare messages for LLM
         messages = [
-            {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": prompt}
+            SystemMessage(content="You are an assistant tasked with evaluating whether the provided summary correctly answers the question. If it does not, generate a more accurate and human-like answer."),
+            HumanMessage(content=prompt)
         ]
 
         # Call the LLM and get the response
-        response = llm.predict(messages=messages)
+        response = llm.invoke(messages)
 
         # Extract and return the response content
-        return response.get("content", "").strip()
+        return response
+

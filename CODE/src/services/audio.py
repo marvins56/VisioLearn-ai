@@ -25,6 +25,18 @@ class AudioService:
     def transcribe(self, file_path: str) -> str:
         content = self.model.transcribe(file_path)
         return content
+    def text_to_audio_v2(self, text: str):
+        # Generate audio content
+        content = self.tts_tool.generate(
+            text=text,
+            voice="Will",
+            model="eleven_multilingual_v2"
+        )
+        
+        # Assuming 'content' is a generator or similar, extract binary data
+        audio_binary = b''.join(content)  # Adjust based on actual return type
+        
+        return audio_binary
 
     def text_to_audio(self, text: str):
         content = self.tts_tool.generate(
