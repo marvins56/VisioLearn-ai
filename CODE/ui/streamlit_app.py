@@ -7,6 +7,7 @@ from src.services import AudioService
 from src.services import WebScraper
 from src.services.WebSearchAndSummarize import WebSearchAndSummarize
 from src.services.summarizer import Summarizer
+from src.services import QuestionGenerator
 from src.utils.LLMUtility import LLMUtility
 from src.utils import read_image
 from src.services.webScrapper import WebScraper
@@ -22,9 +23,8 @@ class StreamlitApp:
         self.llm_utility = LLMUtility()
         self.scraper = WebScraper()
         self.web_search_and_summarize = WebSearchAndSummarize()
+        self.question_generator = QuestionGenerator(self.llm_utility)
         self.answerValidator = AnswerValidator(self.llm_utility)
-
-
 
     def run(self):
         st.title("Document Management System with OCR")
