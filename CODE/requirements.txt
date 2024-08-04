@@ -14,4 +14,4 @@ pandas
 nltk
 openai-whisper
 elevenlabs
-
+google-api-python-client

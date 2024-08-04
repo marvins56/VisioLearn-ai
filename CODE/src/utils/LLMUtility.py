@@ -1,5 +1,5 @@
 import os
-from langchain.chat_models import ChatOpenAI
+from langchain_openai import ChatOpenAI
 from typing import Optional
 
 class LLMUtility:
