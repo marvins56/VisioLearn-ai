@@ -14,8 +14,6 @@ from src.utils.LLMUtility import LLMUtility
 from src.services.AnswerValidator import AnswerValidator
 # from TestFeatures.summaryAgent import Summarizer
 
-
-
 class StreamlitApp:
     def __init__(self):
         self.document_service = DocumentService()
@@ -110,7 +108,11 @@ class StreamlitApp:
                     summary_content = validated_summary.get('content', '') if isinstance(validated_summary, dict) else getattr(validated_summary, 'content', '')
                     
                     st.text_area("Summary", summary_content, height=150)
-                    
+                  # Convert the summary to audio
+                    if summary_content.strip():  # Check if summary is not just whitespace
+                        audio_content = self.audio_service.text_to_audio_v2(summary_content)
+                        st.audio(audio_content, format='audio/mp3')  # Ensure format matches your audio data
+                        
                     st.write("---")
 
                     # Automatically save non-empty summaries
@@ -134,10 +136,6 @@ class StreamlitApp:
             finally:
                 self.web_search_and_summarize.close()
 
-
- 
-
-       
 
     def search_documents_ui(self):
         st.header("Search Documents")

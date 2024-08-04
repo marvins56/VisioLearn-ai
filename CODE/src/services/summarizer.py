@@ -97,37 +97,38 @@ class Summarizer:
         # Step 4: Combine all individual summaries into one document
         combined_summary = "\n".join(summaries)
         logging.info("------------Combined all individual summaries into a single document-----------------")
+        # Return the concatenated summaries
+        return summaries
+        # # Truncate the combined summary if it exceeds the max token limit
+        # truncated_combined_summary = self.truncate_text(combined_summary, self.max_tokens)
+        # logging.info(f"------------Truncated combined summary to fit within token limit-----------------")
 
-        # Truncate the combined summary if it exceeds the max token limit
-        truncated_combined_summary = self.truncate_text(combined_summary, self.max_tokens)
-        logging.info(f"------------Truncated combined summary to fit within token limit-----------------")
-
-        # Step 5: Further summarize the combined summary based on the query
-        final_summary_chain = load_summarize_chain(
-            self.llm,
-            chain_type="map_reduce",  # Use 'map_reduce' instead of 'combine'
-            map_prompt=map_prompt,
-            verbose=True
-        )
+        # # Step 5: Further summarize the combined summary based on the query
+        # final_summary_chain = load_summarize_chain(
+        #     self.llm,
+        #     chain_type="map_reduce",  # Use 'map_reduce' instead of 'combine'
+        #     map_prompt=map_prompt,
+        #     verbose=True
+        # )
         
-        logging.info("---------------Summarizing the combined summary based on the query-------------")
-        attempt = 0
-        max_retries = 1
-        while attempt < max_retries:
-            try:
-                result = final_summary_chain.run({"input_documents": [Document(page_content=truncated_combined_summary)], "query": query})
-                self.log_tokens(result, "Final summary")
-                logging.info("Final summary generated")
-                return result
-            except Exception as e:
-                logging.error(f"Error processing final summary: {str(e)}")
-                attempt += 1
-                sleep_time = 2 ** attempt  # Exponential backoff
-                logging.info(f"Retrying in {sleep_time} seconds...")
-                time.sleep(sleep_time)
+        # logging.info("---------------Summarizing the combined summary based on the query-------------")
+        # attempt = 0
+        # max_retries = 1
+        # while attempt < max_retries:
+        #     try:
+        #         result = final_summary_chain.run({"input_documents": [Document(page_content=truncated_combined_summary)], "query": query})
+        #         self.log_tokens(result, "Final summary")
+        #         logging.info("Final summary generated")
+        #         return result
+        #     except Exception as e:
+        #         logging.error(f"Error processing final summary: {str(e)}")
+        #         attempt += 1
+        #         sleep_time = 2 ** attempt  # Exponential backoff
+        #         logging.info(f"Retrying in {sleep_time} seconds...")
+        #         time.sleep(sleep_time)
         
-        logging.error("Failed to generate final summary after retries.")
-        return "Error: Unable to generate final summary."
+        # logging.error("Failed to generate final summary after retries.")
+        # return "Error: Unable to generate final summary."
 
     
     # def summarize_map_reduce(self, text, query):
