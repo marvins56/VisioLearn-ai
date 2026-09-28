@@ -32,9 +32,9 @@ answer to "who can do what". The institution wants **one Identity Provider (IdP)
 | G5 | Architecture diagram, two risks with mitigations, two recommendations | Task 5 (6) |
 | G6 | Reproducible: anyone can rebuild the lab from the repo with 3 commands | quality |
 
-**Non-goals:** production HA/clustered deployment, external database, TLS certificates, and a real LDAP/AD
-directory. These are covered as *recommendations* rather than built, because the lab environment has no directory
-server. The design still leaves room for them (§8).
+**Non-goals:** production HA/clustered deployment, external database and TLS certificates. These are covered as
+*recommendations* (§9). The production Active Directory is also out of scope. §7a instead demonstrates LDAP user
+federation against a local OpenLDAP directory, which uses the same Keycloak mechanism.
 
 ## 3. Environment
 
@@ -138,6 +138,23 @@ The portal only looks at the three institutional roles and ignores the default r
   *what* the user may open. The demo shows that `student01` is **authenticated** but **not authorized** for
   `/lecturer/grades` (HTTP 403).
 
+## 7a. Directory integration: LDAP / AD user federation
+
+The brief lists "LDAP/AD configuration" as example evidence. To cover it, a local **OpenLDAP** directory
+(`dc=university,dc=local`, loaded by `ldap/setup-ldap.sh`) is federated into `UniversityRealm` by
+`keycloak/setup-ldap-federation.sh`:
+
+| Setting | Value | Rationale |
+|---------|-------|-----------|
+| Provider | `university-ldap`, vendor *Other*, `ldap://127.0.0.1:389` | AD: vendor *Active Directory*, `ldaps://…:636` |
+| Edit mode | `READ_ONLY` | the directory stays the source of truth |
+| Users DN / username | `ou=people,dc=university,dc=local` / `uid` | AD: `sAMAccountName` |
+| Sync | import on, full sync daily, changed users hourly | leavers lose access automatically |
+| Mappers | `first name` → `givenName`; **role-groups** (`role-ldap-mapper`) maps `ou=groups` → realm roles | group membership decides the role, with no manual assignment |
+
+Directory users: `lecturer02` (group `cn=lecturer`) and `student02` (group `cn=student`). Both sign in to the
+portal with their **directory** password (Keycloak binds to LDAP to check it) and receive the matching realm role.
+
 ## 8. Security controls
 
 | Control | Where | Mitigates |
@@ -156,8 +173,8 @@ The portal only looks at the three institutional roles and ignores the default r
 * `kc.sh start` (production profile) with TLS certificates, `--hostname`, and PostgreSQL instead of H2.
 * `sslRequired=all`, HSTS, and a reverse proxy.
 * **MFA (OTP/WebAuthn)**, at least for `system-admin` and `lecturer`.
-* **LDAP/Active Directory user federation** (Realm → User federation) so identities come from the authoritative
-  directory, which gives automatic joiner/mover/leaver handling.
+* Point the user federation shown in §7a at the production **Active Directory over LDAPS**, using a read-only
+  service account, for automatic joiner/mover/leaver handling.
 * Client-secret rotation, or `private_key_jwt`.
 * Send events to a SIEM.
 
@@ -170,10 +187,12 @@ ISM-Keycloak-Assignment/
 ├── docs/02-PLAN.md                 implementation & evidence plan
 ├── docs/diagrams/                  architecture + sequence (HTML source & PNG)
 ├── keycloak/setup-realm.sh         provisioning (Tasks 1–4) via kcadm
+├── keycloak/setup-ldap-federation.sh   LDAP user federation + role mapper
 ├── keycloak/UniversityRealm-realm-export.json   realm export (secrets masked)
+├── ldap/                           OpenLDAP demo directory (LDIF + loader)
 ├── student-portal/                 demo OIDC application
-├── scripts/capture-evidence.mjs    Playwright evidence capture
+├── scripts/capture-evidence.mjs    Playwright evidence capture (+ capture-extra.mjs: create forms, LDAP)
 ├── scripts/build-report.sh/.js     builds the .docx + .pdf report
-├── evidence/                       environment.txt + 52 screenshots
+├── evidence/                       environment.txt + 67 screenshots
 └── report/ISM_Keycloak_Practical_Report.{docx,pdf}   FINAL SUBMISSION
 ```

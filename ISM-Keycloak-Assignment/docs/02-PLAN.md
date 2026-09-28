@@ -47,6 +47,15 @@ The plan is in the order it was carried out. Each step lists its **output**, the
 | 4.6 | Negative test: wrong password | `36-invalid-password` |
 | 4.7 | Write up authentication vs authorization | Design §7, report §7.3 |
 
+## Phase 4b — Evidence extras: create forms and LDAP/AD federation
+| Step | Action | Evidence |
+|------|--------|----------|
+| 4b.1 | Screenshot the create forms for realm, user, role and client | `43`–`46` |
+| 4b.2 | Install OpenLDAP and load `ldap/university-directory.ldif` (`ldap/setup-ldap.sh`) | `47-ldap-directory-entries` |
+| 4b.3 | Add the LDAP provider (READ_ONLY) and a role-ldap-mapper (`keycloak/setup-ldap-federation.sh`) | `48`–`51` |
+| 4b.4 | Sync, then check the imported users and their roles | `52`–`54` |
+| 4b.5 | Log in to the portal as LDAP users `student02` and `lecturer02` | `55`, `56` |
+
 ## Phase 5 — Task 5: Assessment report (6 marks)
 | Step | Action | Output |
 |------|--------|--------|
@@ -66,5 +75,5 @@ The plan is in the order it was carried out. Each step lists its **output**, the
 | Risk | Mitigation |
 |------|------------|
 | Admin Console layout differs between Keycloak versions | Pin 26.7.4; the CLI script is the source of truth |
-| The lab has no LDAP/AD | Documented as a recommendation; design allows adding User Federation later |
+| The lab has no production AD | A local OpenLDAP demonstrates the same User Federation mechanism (Phase 4b) |
 | Screenshots must be the student's own work | A reproducible script means the student can regenerate everything on their own VM |

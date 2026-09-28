@@ -15,7 +15,8 @@ Realm `UniversityRealm`, users `admin01` / `lecturer01` / `student01`, RBAC role
 | Keycloak provisioning script | [`keycloak/setup-realm.sh`](keycloak/setup-realm.sh) |
 | Realm export (secrets masked) | [`keycloak/UniversityRealm-realm-export.json`](keycloak/UniversityRealm-realm-export.json) |
 | Demo application (OIDC client) | [`student-portal/`](student-portal) |
-| Evidence (52 screenshots + environment log) | [`evidence/`](evidence) |
+| LDAP directory + federation (evidence "LDAP/AD configuration") | [`ldap/`](ldap), [`keycloak/setup-ldap-federation.sh`](keycloak/setup-ldap-federation.sh) |
+| Evidence (67 screenshots + environment log) | [`evidence/`](evidence) |
 
 > **Before submitting:** put your name, registration number, programme, lecturer and date on the cover page.
 > Either edit the .docx directly, or rebuild it:
@@ -36,6 +37,10 @@ KC_BOOTSTRAP_ADMIN_USERNAME=temp-admin KC_BOOTSTRAP_ADMIN_PASSWORD='TempAdmin#20
 # 2. Configure admin account, realm, roles, users and client (Tasks 1-4) — prints the client secret
 ./keycloak/setup-realm.sh
 
+# 2b. Optional: LDAP directory + user federation (report section 4.2)
+sudo apt install -y slapd ldap-utils        # admin password LdapAdmin#2026, domain university.local
+./ldap/setup-ldap.sh && ./keycloak/setup-ldap-federation.sh
+
 # 3. Run the test application
 cd student-portal
 cp .env.example .env        # paste KC_CLIENT_SECRET from step 2
@@ -43,13 +48,14 @@ npm install && npm start    # http://localhost:3000
 ```
 
 Credentials in the lab: Keycloak admin `iamadmin` / `IamAdmin#2026`; the three realm users use
-`Passw0rd#2026`. These are **lab-only** values, so change them (env vars in `setup-realm.sh`) on any shared machine.
+`Passw0rd#2026`. So do the LDAP users `lecturer02` and `student02`. These are **lab-only** values, so change them (env vars in `setup-realm.sh`) on any shared machine.
 
 ### Regenerate the evidence and the report (optional)
 
 ```bash
 npm i -g playwright                                   # uses Chromium
 NPM_ROOT=$(npm root -g) node scripts/capture-evidence.mjs
+NPM_ROOT=$(npm root -g) node scripts/capture-extra.mjs      # after the LDAP step
 NPM_ROOT=$(npm root -g) node scripts/render-diagrams.mjs
 cd scripts && npm install && ./build-report.sh        # needs LibreOffice Writer + pip install pymupdf
 ```
@@ -64,3 +70,5 @@ The script just automates the same configuration.
 | admin01 | system-admin | ✅ | 403 | 403 |
 | lecturer01 | lecturer | 403 | ✅ | 403 |
 | student01 | student | 403 | 403 | ✅ |
+| lecturer02 (LDAP) | lecturer, via LDAP group | 403 | ✅ | 403 |
+| student02 (LDAP) | student, via LDAP group | 403 | 403 | ✅ |

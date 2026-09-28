@@ -1,0 +1,41 @@
+# Institutional directory (OpenLDAP) federated into Keycloak UniversityRealm.
+# Base DN: dc=university,dc=local
+dn: ou=people,dc=university,dc=local
+objectClass: organizationalUnit
+ou: people
+description: Staff and student accounts (source of truth: HR / admissions)
+
+dn: ou=groups,dc=university,dc=local
+objectClass: organizationalUnit
+ou: groups
+description: Institutional role groups mapped to Keycloak realm roles
+
+dn: uid=lecturer02,ou=people,dc=university,dc=local
+objectClass: inetOrgPerson
+uid: lecturer02
+cn: Grace Hopper
+givenName: Grace
+sn: Hopper
+mail: lecturer02@university.local
+employeeType: staff
+
+dn: uid=student02,ou=people,dc=university,dc=local
+objectClass: inetOrgPerson
+uid: student02
+cn: Samuel Okello
+givenName: Samuel
+sn: Okello
+mail: student02@university.local
+employeeType: student
+
+dn: cn=lecturer,ou=groups,dc=university,dc=local
+objectClass: groupOfNames
+cn: lecturer
+description: Teaching staff
+member: uid=lecturer02,ou=people,dc=university,dc=local
+
+dn: cn=student,ou=groups,dc=university,dc=local
+objectClass: groupOfNames
+cn: student
+description: Enrolled students
+member: uid=student02,ou=people,dc=university,dc=local
