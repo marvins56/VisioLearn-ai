@@ -1,0 +1,19 @@
+{
+  "name": "student-portal",
+  "version": "1.0.0",
+  "description": "Demo institutional application protected by Keycloak (OIDC Authorization Code + PKCE) with role-based authorization",
+  "main": "server.js",
+  "private": true,
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "dotenv": "^16.6.1",
+    "express": "^4.22.3",
+    "express-session": "^1.19.0",
+    "openid-client": "^5.7.1"
+  }
+}

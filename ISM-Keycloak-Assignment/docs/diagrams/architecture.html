@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>IAM Architecture</title>
+<style>
+  body { margin:0; background:#fff; font-family: 'DejaVu Sans', Arial, sans-serif; }
+  svg text { font-family: 'DejaVu Sans', Arial, sans-serif; }
+</style></head>
+<body>
+<!-- Identity Management Architecture: Users -> Application -> Keycloak -->
+<svg id="architecture" xmlns="http://www.w3.org/2000/svg" width="1400" height="790" viewBox="0 0 1400 790">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#334155"/></marker>
+    <marker id="b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#1f4e8c"/></marker>
+  </defs>
+  <text x="700" y="40" text-anchor="middle" font-size="26" font-weight="700" fill="#0f172a">Identity Management Architecture &#8212; UniversityRealm</text>
+  <text x="700" y="68" text-anchor="middle" font-size="15" fill="#475569">Users &#8594; Application (student-portal) &#8594; Keycloak (central Identity Provider)</text>
+
+  <!-- USERS -->
+  <rect x="30" y="110" width="290" height="560" rx="14" fill="#f1f5f9" stroke="#94a3b8"/>
+  <text x="175" y="145" text-anchor="middle" font-size="19" font-weight="700" fill="#0f172a">USERS (browser)</text>
+  <g font-size="15">
+    <rect x="55" y="175" width="240" height="120" rx="10" fill="#fff" stroke="#b91c1c" stroke-width="2"/>
+    <text x="175" y="205" text-anchor="middle" font-weight="700" fill="#b91c1c">Administrator</text>
+    <text x="175" y="232" text-anchor="middle" fill="#0f172a">admin01</text>
+    <text x="175" y="258" text-anchor="middle" fill="#475569">role: system-admin</text>
+    <rect x="55" y="320" width="240" height="120" rx="10" fill="#fff" stroke="#1d4ed8" stroke-width="2"/>
+    <text x="175" y="350" text-anchor="middle" font-weight="700" fill="#1d4ed8">Lecturer</text>
+    <text x="175" y="377" text-anchor="middle" fill="#0f172a">lecturer01</text>
+    <text x="175" y="403" text-anchor="middle" fill="#475569">role: lecturer</text>
+    <rect x="55" y="465" width="240" height="120" rx="10" fill="#fff" stroke="#15803d" stroke-width="2"/>
+    <text x="175" y="495" text-anchor="middle" font-weight="700" fill="#15803d">Student</text>
+    <text x="175" y="522" text-anchor="middle" fill="#0f172a">student01</text>
+    <text x="175" y="548" text-anchor="middle" fill="#475569">role: student</text>
+  </g>
+  <text x="175" y="640" text-anchor="middle" font-size="13" fill="#475569">No passwords are ever typed</text>
+  <text x="175" y="658" text-anchor="middle" font-size="13" fill="#475569">into the application</text>
+
+  <!-- APPLICATION -->
+  <rect x="470" y="110" width="360" height="560" rx="14" fill="#eef4fc" stroke="#1f4e8c" stroke-width="2"/>
+  <text x="650" y="145" text-anchor="middle" font-size="19" font-weight="700" fill="#1f4e8c">APPLICATION</text>
+  <text x="650" y="170" text-anchor="middle" font-size="15" fill="#0f172a">Student Portal (Node.js / Express)</text>
+  <text x="650" y="192" text-anchor="middle" font-size="14" fill="#475569">http://localhost:3000 &#183; OIDC Relying Party</text>
+  <g font-size="14" fill="#0f172a">
+    <rect x="495" y="215" width="310" height="92" rx="8" fill="#fff" stroke="#93b4dd"/>
+    <text x="510" y="240" font-weight="700">OIDC client library</text>
+    <text x="510" y="263">Auth Code + PKCE (S256), state, nonce</text>
+    <text x="510" y="285">ID-token signature check (JWKS)</text>
+    <rect x="495" y="322" width="310" height="92" rx="8" fill="#fff" stroke="#93b4dd"/>
+    <text x="510" y="347" font-weight="700">Session (HttpOnly cookie)</text>
+    <text x="510" y="370">id_token + access_token server-side</text>
+    <text x="510" y="392">session id regenerated after login</text>
+    <rect x="495" y="429" width="310" height="215" rx="8" fill="#fff" stroke="#93b4dd"/>
+    <text x="510" y="454" font-weight="700">Authorization: requireRole()</text>
+    <text x="510" y="477">reads realm_access.roles</text>
+    <text x="510" y="505" fill="#b91c1c">/admin            &#8594; system-admin</text>
+    <text x="510" y="530" fill="#1d4ed8">/lecturer/grades  &#8594; lecturer</text>
+    <text x="510" y="555" fill="#15803d">/student/courses  &#8594; student</text>
+    <text x="510" y="583">/dashboard, /token &#8594; any</text>
+    <text x="510" y="604">authenticated user</text>
+    <text x="510" y="628" fill="#475569">otherwise HTTP 403</text>
+  </g>
+
+  <!-- KEYCLOAK -->
+  <rect x="980" y="110" width="390" height="560" rx="14" fill="#fff7ed" stroke="#c2410c" stroke-width="2"/>
+  <text x="1175" y="145" text-anchor="middle" font-size="19" font-weight="700" fill="#c2410c">KEYCLOAK 26.7.4 (IdP)</text>
+  <text x="1175" y="170" text-anchor="middle" font-size="14" fill="#475569">http://localhost:8080 &#183; Ubuntu 24.04 &#183; OpenJDK 21</text>
+  <g font-size="14" fill="#0f172a">
+    <rect x="1000" y="190" width="350" height="78" rx="8" fill="#fff" stroke="#fdba74"/>
+    <text x="1015" y="214" font-weight="700">master realm</text>
+    <text x="1015" y="237">iamadmin (admin) &#8212; Admin Console only</text>
+    <text x="1015" y="258" fill="#475569">temporary bootstrap admin deleted</text>
+    <rect x="1000" y="282" width="350" height="370" rx="8" fill="#fff" stroke="#c2410c"/>
+    <text x="1015" y="307" font-weight="700" fill="#c2410c">UniversityRealm</text>
+    <text x="1015" y="333" font-weight="700">Users</text>
+    <text x="1030" y="354">admin01 &#183; lecturer01 &#183; student01</text>
+    <text x="1015" y="380" font-weight="700">Realm roles</text>
+    <text x="1030" y="401">system-admin &#183; lecturer &#183; student</text>
+    <text x="1015" y="427" font-weight="700">Client: student-portal</text>
+    <text x="1030" y="448">OpenID Connect, confidential</text>
+    <text x="1030" y="469">standard flow only, PKCE S256</text>
+    <text x="1030" y="490">redirect: :3000/callback</text>
+    <text x="1015" y="516" font-weight="700">Security policies</text>
+    <text x="1030" y="537">password policy (10+, mixed, history 3)</text>
+    <text x="1030" y="558">brute-force lockout after 5 failures</text>
+    <text x="1030" y="579">5-min access tokens, 30-min idle SSO</text>
+    <text x="1015" y="605" font-weight="700">Audit</text>
+    <text x="1030" y="626">login + admin events recorded</text>
+  </g>
+
+  <!-- ARROWS -->
+  <g stroke="#334155" stroke-width="2.4" fill="none">
+    <line x1="322" y1="235" x2="466" y2="235" marker-end="url(#a)"/>
+    <line x1="322" y1="380" x2="466" y2="380" marker-end="url(#a)"/>
+    <line x1="322" y1="525" x2="466" y2="525" marker-end="url(#a)"/>
+  </g>
+  <text x="394" y="222" text-anchor="middle" font-size="13" fill="#334155">&#9312; open app</text>
+  <text x="394" y="367" text-anchor="middle" font-size="13" fill="#334155">HTTP(S)</text>
+  <text x="394" y="512" text-anchor="middle" font-size="13" fill="#334155">(browser)</text>
+
+  <g stroke="#1f4e8c" stroke-width="2.4" fill="none">
+    <line x1="834" y1="250" x2="976" y2="250" marker-end="url(#b)"/>
+    <line x1="976" y1="330" x2="834" y2="330" marker-end="url(#b)"/>
+    <line x1="834" y1="420" x2="976" y2="420" marker-end="url(#b)"/>
+    <line x1="976" y1="500" x2="834" y2="500" marker-end="url(#b)"/>
+  </g>
+  <g font-size="12.5" fill="#1f4e8c" text-anchor="middle">
+    <text x="905" y="237">&#9313; redirect to /auth</text>
+    <text x="905" y="317">&#9315; code &#8594; /callback</text>
+    <text x="905" y="407">&#9316; code + secret</text>
+    <text x="905" y="487">&#9317; ID + access token</text>
+  </g>
+  <!-- login arc user <-> keycloak -->
+  <path d="M175,672 C175,735 1175,735 1175,672" stroke="#c2410c" stroke-width="2.4" fill="none" stroke-dasharray="7 5" marker-end="url(#a)"/>
+  <text x="700" y="772" text-anchor="middle" font-size="14" fill="#c2410c">&#9314; user signs in on the Keycloak login page (credentials go only to Keycloak; brute-force &amp; password policy enforced here)</text>
+</svg>
+
+<!-- Authentication sequence -->
+<svg id="sequence" xmlns="http://www.w3.org/2000/svg" width="1400" height="820" viewBox="0 0 1400 820">
+  <defs>
+    <marker id="s" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#1e293b"/></marker>
+  </defs>
+  <text x="700" y="36" text-anchor="middle" font-size="24" font-weight="700" fill="#0f172a">Authentication flow &#8212; OIDC Authorization Code + PKCE</text>
+  <g font-size="17" font-weight="700" text-anchor="middle">
+    <rect x="80" y="60" width="220" height="50" rx="8" fill="#f1f5f9" stroke="#64748b"/><text x="190" y="92">User (browser)</text>
+    <rect x="590" y="60" width="220" height="50" rx="8" fill="#eef4fc" stroke="#1f4e8c"/><text x="700" y="92" fill="#1f4e8c">student-portal</text>
+    <rect x="1100" y="60" width="220" height="50" rx="8" fill="#fff7ed" stroke="#c2410c"/><text x="1210" y="92" fill="#c2410c">Keycloak</text>
+  </g>
+  <g stroke="#94a3b8" stroke-dasharray="5 5"><line x1="190" y1="110" x2="190" y2="765"/><line x1="700" y1="110" x2="700" y2="765"/><line x1="1210" y1="110" x2="1210" y2="765"/></g>
+  <g stroke="#1e293b" stroke-width="2" marker-end="url(#s)">
+    <line x1="190" y1="150" x2="696" y2="150"/>
+    <line x1="700" y1="210" x2="194" y2="210"/>
+    <line x1="190" y1="270" x2="1206" y2="270"/>
+    <line x1="1210" y1="330" x2="194" y2="330"/>
+    <line x1="190" y1="390" x2="1206" y2="390"/>
+    <line x1="1210" y1="450" x2="194" y2="450"/>
+    <line x1="190" y1="510" x2="696" y2="510"/>
+    <line x1="700" y1="570" x2="1206" y2="570"/>
+    <line x1="1210" y1="630" x2="704" y2="630"/>
+    <line x1="700" y1="740" x2="194" y2="740"/>
+  </g>
+  <g font-size="14.5" fill="#0f172a">
+    <text x="200" y="142">1. GET /dashboard (not signed in) &#8594; GET /login</text>
+    <text x="210" y="202">2. 302 to /auth?client_id=student-portal&amp;code_challenge=&#8230;&amp;state&amp;nonce</text>
+    <text x="200" y="262">3. GET /realms/UniversityRealm/protocol/openid-connect/auth</text>
+    <text x="210" y="322">4. Login page ("University Identity Service")</text>
+    <text x="200" y="382">5. POST username + password  &#8212;  AUTHENTICATION (password policy, brute-force check, enabled?)</text>
+    <text x="210" y="442">6. 302 to http://localhost:3000/callback?code=&#8230;&amp;state=&#8230; (redirect URI must match exactly)</text>
+    <text x="200" y="502">7. GET /callback?code&amp;state</text>
+    <text x="710" y="562">8. POST /token  code + code_verifier + client secret</text>
+    <text x="712" y="622">9. id_token + access_token (RS256 signed JWTs)</text>
+    <text x="712" y="660">10. verify signature (JWKS), iss, aud, nonce, exp</text>
+    <text x="712" y="684">11. read realm_access.roles  &#8212;  AUTHORIZATION</text>
+    <text x="210" y="732">12. Dashboard; /admin, /lecturer/grades, /student/courses allowed or 403 by role</text>
+  </g>
+  <rect x="704" y="642" width="490" height="54" rx="6" fill="none" stroke="#1f4e8c" stroke-dasharray="4 3"/>
+  <text x="700" y="790" text-anchor="middle" font-size="14" fill="#475569">User &#8594; Application &#8594; Keycloak &#8594; Login &#8594; Authentication &#8594; Application Access</text>
+</svg>
+</body></html>

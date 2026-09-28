@@ -1,0 +1,11 @@
+{
+  "name": "ism-keycloak-scripts",
+  "private": true,
+  "description": "Build helpers: evidence capture (Playwright, global) and report generation (docx)",
+  "scripts": {
+    "report": "node build-report.js"
+  },
+  "dependencies": {
+    "docx": "^9.8.1"
+  }
+}
